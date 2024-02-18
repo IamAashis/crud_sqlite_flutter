@@ -1,28 +1,37 @@
 import 'package:crud_sqlite_flutter/database/db_helper.dart';
 import 'package:crud_sqlite_flutter/model/item_model.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod/riverpod.dart';
 
-class ItemListProvider with ChangeNotifier {
+final itemListProvider =
+    StateNotifierProvider<ItemListNotifier, List<ItemModel>>(
+        (ref) => ItemListNotifier());
+
+class ItemListNotifier extends StateNotifier<List<ItemModel>> {
   final db = DbHelper();
 
-  Future<List<ItemModel>> getItemList() async {
-    List<ItemModel> _itemList = await db.fetchItems();
+  ItemListNotifier() : super([]);
 
-    return _itemList;
+  Future<void> fetchItemList() async {
+    state = await db.fetchItems();
   }
 
   Future<void> addItem(ItemModel itemModel) async {
     await db.addItem(itemModel);
-    notifyListeners();
+    fetchItemList();
   }
 
   Future<void> updateItem(ItemModel itemModel) async {
     await db.updateUser(itemModel.id, itemModel);
-    notifyListeners();
+    fetchItemList();
   }
 
-  Future<void> deleteUser(int itemId) async {
+  Future<void> deleteItem(int itemId) async {
     await db.deleteItem(itemId);
-    notifyListeners();
+    fetchItemList();
   }
 }
+
+final itemNameControllerProvider = StateProvider<String>((ref) => "");
+final itemPriceControllerProvider = StateProvider<String>((ref) => "");
+final temporaryImagePathProvider = StateProvider<String>((ref) => "");
