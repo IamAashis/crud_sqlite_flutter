@@ -4,13 +4,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod/riverpod.dart';
 
 final itemListProvider =
-    StateNotifierProvider<ItemListNotifier, List<ItemModel>>(
-        (ref) => ItemListNotifier());
+    StateNotifierProvider<ItemListNotifier, List<ItemModel>>((ref) {
+  return ItemListNotifier(ref: ref);
+});
 
 class ItemListNotifier extends StateNotifier<List<ItemModel>> {
   final db = DbHelper();
+  Ref ref;
 
-  ItemListNotifier() : super([]);
+  ItemListNotifier({required this.ref}) : super(List.empty()) {
+    fetchItemList();
+  }
 
   Future<void> fetchItemList() async {
     state = await db.fetchItems();
@@ -31,6 +35,12 @@ class ItemListNotifier extends StateNotifier<List<ItemModel>> {
     fetchItemList();
   }
 }
+
+final sharedPreferencesProvider = Provider((ref) {
+  final DbHelper dbHelper = DbHelper();
+  dbHelper.init();
+  return dbHelper;
+});
 
 final itemNameControllerProvider = StateProvider<String>((ref) => "");
 final itemPriceControllerProvider = StateProvider<String>((ref) => "");
